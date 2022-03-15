@@ -6,7 +6,7 @@ from hemlock_ax.assign import assigners
 
 import src
 
-N_USERS = 100
+N_USERS = 10
 
 
 @pytest.fixture
