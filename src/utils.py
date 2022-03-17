@@ -1,0 +1,6 @@
+DATE_FORMAT = "%Y-%m-%d"
+OUTCOME_VARIABLE = "outcome"
+QUESTION_VARIABLE = "question"
+START_TIME_VARIABLE = "start_time_et"
+TARGET = "target"
+TREATMENT_VARIABLE = "treatment"
