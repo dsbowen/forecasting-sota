@@ -36,22 +36,23 @@ def get_data(assigner):
             df = df.drop(columns=OUTCOME_VARIABLE).merge(
                 outcome_df, on=[START_TIME_VARIABLE, QUESTION_VARIABLE], how="left"
             )
-            for data in user.data:
-                if data.variable == OUTCOME_VARIABLE:
-                    outcome_data = data
-                if data.variable == TARGET:
-                    target_data = data
+            if df[OUTCOME_VARIABLE].count() > 0:
+                for data in user.data:
+                    if data.variable == OUTCOME_VARIABLE:
+                        outcome_data = data
+                    if data.variable == TARGET:
+                        target_data = data
 
-            outcome_data.data = list(df[OUTCOME_VARIABLE])
-            treatment = treatments[user.get_meta_data()[TREATMENT_VARIABLE]]
-            loss = partial(
-                crps,
-                convert_to_distribution=treatment["convert_to_distribution"],
-            )
-            target_data.data = list(df.apply(loss, axis=1))
-            user.cache_data()
-            if not df[OUTCOME_VARIABLE].isna().any():
-                user.has_target = True
+                outcome_data.data = list(df[OUTCOME_VARIABLE].replace(np.nan, None))
+                treatment = treatments[user.get_meta_data()[TREATMENT_VARIABLE]]
+                loss = partial(
+                    crps,
+                    convert_to_distribution=treatment["convert_to_distribution"],
+                )
+                target_data.data = list(df.apply(loss, axis=1))
+                user.cache_data()
+                if not df[OUTCOME_VARIABLE].isna().any():
+                    user.has_target = True
 
     db.session.commit()
 

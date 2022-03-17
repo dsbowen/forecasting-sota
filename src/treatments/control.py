@@ -32,7 +32,7 @@ def make_forecast_page(question):
         *[
             Input(
                 f"I think there is a {int(100*percent)}% chance that {info[1]}.",
-                input_tag={"type": "number", "step": 1, "required": True},
+                input_tag={"type": "number", "step": "any", "required": True},
                 variable=f"ppf_{percent}",
             )
             for percent in (0, 0.25, 0.5, 0.75, 1)
