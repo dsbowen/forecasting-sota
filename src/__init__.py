@@ -1,5 +1,7 @@
 """Main survey file.
 """
+from __future__ import annotations
+
 import os
 from random import shuffle
 
@@ -31,7 +33,7 @@ assigner = Assigner(
 
 
 @User.route("/survey")
-def seed():
+def seed() -> list[Page]:
     """Creates the main survey branch.
 
     Returns:

@@ -1,6 +1,11 @@
+"""Defines the control arm.
+"""
+from __future__ import annotations
+
 from hemlock import Page
 from hemlock.questions import Input, Label
 
+from ..questions import QuestionType
 from ..scoring import convert_to_nonparametric_elicitation
 
 question_info = {
@@ -15,11 +20,27 @@ question_info = {
 }
 
 
-def make_forecast_pages(questions):
+def make_forecast_pages(questions: list[QuestionType]) -> list[Page]:
+    """Create forecasting pages.
+
+    Args:
+        questions (list[QuestionType]): Questions to forecast.
+
+    Returns:
+        list[Page]: Pages on which users make their forecasts.
+    """
     return [make_forecast_page(q) for q in questions]
 
 
-def make_forecast_page(question):
+def make_forecast_page(question: QuestionType) -> Page:
+    """Create a forecasting page.
+
+    Args:
+        question (QuestionType): Question to forecast.
+
+    Returns:
+        Page: Page on which the user makes his forecast.
+    """
     info = question_info[question["name"]]
     return Page(
         Label(

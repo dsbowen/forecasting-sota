@@ -30,6 +30,5 @@ def test(app):
     for assigner in assigners:
         if not assigner.weights:
             raise RuntimeError(
-                "Assigner weights not set."
-                "Make sure the target variable is numeric."
+                "Assigner weights not set." "Make sure the target variable is numeric."
             )

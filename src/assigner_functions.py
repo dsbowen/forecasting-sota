@@ -1,10 +1,17 @@
+"""Functions for the adaptive assigner
+"""
+from __future__ import annotations
+
 from functools import partial
+from typing import Any
 
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm
 from hemlock import User
 from hemlock.app import db
-from hemlock_ax.assign import get_data as get_data_base
+from hemlock_ax.assign import Assigner, get_data as get_data_base
+from hemlock_ax.models import ModelReturnType
 from scipy.stats import multivariate_normal
 
 from .questions import questions
@@ -21,7 +28,15 @@ from .utils import (
 CUTOFF_STD = -3
 
 
-def get_data(assigner):
+def get_data(assigner: Assigner) -> pd.DataFrame:
+    """Get users' data.
+
+    Args:
+        assigner (Assigner): Adaptive assigner.
+
+    Returns:
+        pd.DataFrame: Users' data.
+    """
     # update outcomes and targets from the previous day's outcomes
     def get_outcome_df(question):
         df = question["get_outcome"]()
@@ -76,14 +91,35 @@ def get_data(assigner):
     return standardize_target(df)
 
 
-def enough_control_users(df, min_control_users=2):
+def enough_control_users(df: pd.DataFrame, min_control_users: int = 2) -> bool:
+    """Indicates that there are enough users in the control condition.
+
+    Args:
+        df (pd.DataFrame): User's data.
+        min_control_users (int, optional): Minimum number of users that need to be in
+            the control condition for the model to fit. Defaults to 2.
+
+    Returns:
+        bool: Indicator.
+    """
     return (
         df[df[TREATMENT_VARIABLE] == CONTROL_ARM].groupby("question").target.count()
         < min_control_users
     ).any()
 
 
-def standardize_target(df):
+def standardize_target(df: pd.DataFrame) -> pd.DataFrame:
+    """Standardizes the target variable.
+
+    For each day and question, standardize the target using the control group mean and
+    standard error.
+
+    Args:
+        df (pd.DataFrame): User data with unstandardized target.
+
+    Returns:
+        pd.DataFrame: User data with standardized target.
+    """
     gb_variables = [START_TIME_VARIABLE, QUESTION_VARIABLE]
     gb = df[df[TREATMENT_VARIABLE] == CONTROL_ARM].groupby(gb_variables)[TARGET]
     control_df = gb.mean().reset_index().rename(columns={TARGET: "control_mean"})
@@ -93,7 +129,18 @@ def standardize_target(df):
     return df.drop(columns=["control_mean", "control_std"])
 
 
-def fixed_effects_regression(df, **kwargs):
+def fixed_effects_regression(df: pd.DataFrame, **kwargs: Any) -> ModelReturnType:
+    """Run a fixed effects regression.
+
+    Fixed effects are question x date. Cluster standard errors by date.
+
+    Args:
+        df (pd.DataFrame): User data.
+
+    Returns:
+        ModelReturnType: List of possible assignments, distribution of treatment
+            effects.
+    """
     df = df.dropna(subset=[TREATMENT_VARIABLE, TARGET])
     df["fixed_effects"] = df[[START_TIME_VARIABLE, QUESTION_VARIABLE]].apply(
         lambda x: tuple(x), axis=1
