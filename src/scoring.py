@@ -8,7 +8,7 @@ def crps(row, convert_to_distribution):
     try:
         dist = convert_to_distribution(row)
         x = np.linspace(dist.ppf(0.01), dist.ppf(0.99))
-        return ((dist.cdf(x) - (x > row[OUTCOME_VARIABLE])) ** 2).sum() * (x[1] - x[0])
+        return - ((dist.cdf(x) - (x > row[OUTCOME_VARIABLE])) ** 2).sum() * (x[-1] - x[0])
     except ValueError:
         return None
 

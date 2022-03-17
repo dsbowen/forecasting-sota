@@ -48,7 +48,7 @@ def get_data(assigner):
                 crps,
                 convert_to_distribution=treatment["convert_to_distribution"],
             )
-            target_data.data = list(-df.apply(loss, axis=1))
+            target_data.data = list(df.apply(loss, axis=1))
             user.cache_data()
             if not df[OUTCOME_VARIABLE].isna().any():
                 user.has_target = True
